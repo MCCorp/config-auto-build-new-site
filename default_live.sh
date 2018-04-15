@@ -13,21 +13,38 @@ SITEROOT=${HOME_MCUS}
 rm ${PATH_DOMAIN_CONFIG};
 rm "/etc/nginx/sites-enabled/"${DOMAIN}".conf";
 #copy and link config
-cp "${PATH_DEFAULT_DOMAIN_CONFIG}default.conf" ${PATH_DOMAIN_CONFIG};
+cp "/home/deploy_scripts/config-auto-build-new-site/default.conf" ${PATH_DOMAIN_CONFIG};
 ln -s ${PATH_DOMAIN_CONFIG} "/etc/nginx/sites-enabled/"${DOMAIN}".conf";
-
-#replace params
 sed -i -e "s|DOMAIN|$DOMAIN|g" ${PATH_DOMAIN_CONFIG};
 sed -i -e "s|SITEROOT|${SITEROOT}|g" ${PATH_DOMAIN_CONFIG};
+
+#copy config admin
+rm "/etc/nginx/sites-available/admin.conf";
+rm "/etc/nginx/sites-enabled/admin.conf";
+cp "/home/deploy_scripts/config-auto-build-new-site/admin.conf" "/etc/nginx/sites-available/admin.conf";
+sed -i -e "s|DOMAIN|$DOMAIN|g" "/etc/nginx/sites-available/admin.conf";
+ln -s "/etc/nginx/sites-available/admin.conf" "/etc/nginx/sites-enabled/admin.conf"
+#copy config afftrust
+rm "/etc/nginx/sites-available/afftrust.conf";
+rm "/etc/nginx/sites-enabled/afftrust.conf";
+cp "/home/deploy_scripts/config-auto-build-new-site/afftrust.conf" "/etc/nginx/sites-available/afftrust.conf";
+sed -i -e "s|DOMAIN|$DOMAIN|g" "/etc/nginx/sites-available/afftrust.conf";
+ln -s "/etc/nginx/sites-available/afftrust.conf" "/etc/nginx/sites-enabled/afftrust.conf"
+
+
+
 #restart nginx
 service nginx restart
+
 #restart API
 #sudo sh /home/deploy_scripts/Live/live_api.sh
 #sudo sh /home/deploy_scripts/Live/live_admin.sh
 #sudo sh /home/deploy_scripts/Live/afftrust.sh
+
 echo 'Rename domain in Admin config';
 cd /var/www/html/Admin_Live/public;
 DOMAIN='http://'$DOMAIN'/'
+echo $DOMAIN;
 sed -i -e "s|DOMAIN|$DOMAIN|g" /var/www/html/Admin_Live/public/app.config.js
 #--------------------------------------------------------------------------------------
 
