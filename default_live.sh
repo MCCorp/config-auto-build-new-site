@@ -51,6 +51,9 @@ sed -i -e "s|DOMAIN|$DOMAIN|g" /var/www/html/Admin_Live/public/app.config.js
 echo "****** Copy master souce code from jenkin workspace to Live ******";
 rsync -az --delete --exclude='.git/' --exclude='/storage/framework/sessions/' ${WORK_SPACE_JENKIN}/ ${HOME_MCUS}/;
 
+#create session folder
+[ -f ${HOME_MCUS}/storage/framework/sessions ] && chmod -R 777 ${HOME_MCUS}/storage/framework/sessions || mkdir ${HOME_MCUS}/storage/framework/sessions && chmod -R 777 ${HOME_MCUS}/storage/framework/sessions
+
 echo "****** Working with config file and content... ******";
 
 cd ${HOME_MCUS}/config
