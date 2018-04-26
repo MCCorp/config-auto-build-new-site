@@ -10,28 +10,34 @@ PATH_DEFAULT_DOMAIN_CONFIG="/etc/nginx/sites-available/"
 PATH_DOMAIN_CONFIG=${PATH_DEFAULT_DOMAIN_CONFIG}${DOMAIN}".conf"
 SITEROOT=${HOME_MCUS}
 #copy default config
-rm ${PATH_DOMAIN_CONFIG};
-rm "/etc/nginx/sites-enabled/"${DOMAIN}".conf";
-#copy and link config
-cp "/home/deploy_scripts/config-auto-build-new-site/default.conf" ${PATH_DOMAIN_CONFIG};
-ln -s ${PATH_DOMAIN_CONFIG} "/etc/nginx/sites-enabled/"${DOMAIN}".conf";
-sed -i -e "s|DOMAIN|$DOMAIN|g" ${PATH_DOMAIN_CONFIG};
-sed -i -e "s|SITEROOT|${SITEROOT}|g" ${PATH_DOMAIN_CONFIG};
+if [ ! -f ${PATH_DOMAIN_CONFIG} ]; then
+	rm ${PATH_DOMAIN_CONFIG};
+	rm "/etc/nginx/sites-enabled/"${DOMAIN}".conf";
+	#copy and link config
+	cp "/home/deploy_scripts/config-auto-build-new-site/default.conf" ${PATH_DOMAIN_CONFIG};
+	ln -s ${PATH_DOMAIN_CONFIG} "/etc/nginx/sites-enabled/"${DOMAIN}".conf";
+	sed -i -e "s|DOMAIN|$DOMAIN|g" ${PATH_DOMAIN_CONFIG};
+	sed -i -e "s|SITEROOT|${SITEROOT}|g" ${PATH_DOMAIN_CONFIG};
+fi	
+
 
 #copy config admin
-rm "/etc/nginx/sites-available/admin.conf";
-rm "/etc/nginx/sites-enabled/admin.conf";
-cp "/home/deploy_scripts/config-auto-build-new-site/admin.conf" "/etc/nginx/sites-available/admin.conf";
-sed -i -e "s|DOMAIN|$DOMAIN|g" "/etc/nginx/sites-available/admin.conf";
-ln -s "/etc/nginx/sites-available/admin.conf" "/etc/nginx/sites-enabled/admin.conf"
+if [ ! -f /etc/nginx/sites-available/admin.conf ]; then
+	rm "/etc/nginx/sites-available/admin.conf";
+	rm "/etc/nginx/sites-enabled/admin.conf";
+	cp "/home/deploy_scripts/config-auto-build-new-site/admin.conf" "/etc/nginx/sites-available/admin.conf";
+	sed -i -e "s|DOMAIN|$DOMAIN|g" "/etc/nginx/sites-available/admin.conf";
+	ln -s "/etc/nginx/sites-available/admin.conf" "/etc/nginx/sites-enabled/admin.conf"
+fi
+
 #copy config afftrust
-rm "/etc/nginx/sites-available/afftrust.conf";
-rm "/etc/nginx/sites-enabled/afftrust.conf";
-cp "/home/deploy_scripts/config-auto-build-new-site/afftrust.conf" "/etc/nginx/sites-available/afftrust.conf";
-sed -i -e "s|DOMAIN|$DOMAIN|g" "/etc/nginx/sites-available/afftrust.conf";
-ln -s "/etc/nginx/sites-available/afftrust.conf" "/etc/nginx/sites-enabled/afftrust.conf"
-
-
+if [ ! -f /etc/nginx/sites-available/afftrust.conf ]; then
+	rm "/etc/nginx/sites-available/afftrust.conf";
+	rm "/etc/nginx/sites-enabled/afftrust.conf";
+	cp "/home/deploy_scripts/config-auto-build-new-site/afftrust.conf" "/etc/nginx/sites-available/afftrust.conf";
+	sed -i -e "s|DOMAIN|$DOMAIN|g" "/etc/nginx/sites-available/afftrust.conf";
+	ln -s "/etc/nginx/sites-available/afftrust.conf" "/etc/nginx/sites-enabled/afftrust.conf"	
+fi	
 
 #restart nginx
 service nginx restart
@@ -52,7 +58,13 @@ echo "****** Copy master souce code from jenkin workspace to Live ******";
 rsync -az --delete --exclude='.git/' --exclude='/storage/framework/sessions/' ${WORK_SPACE_JENKIN}/ ${HOME_MCUS}/;
 
 #create session folder
-[ -f ${HOME_MCUS}/storage/framework/sessions ] && chmod -R 777 ${HOME_MCUS}/storage/framework/sessions || mkdir ${HOME_MCUS}/storage/framework/sessions && chmod -R 777 ${HOME_MCUS}/storage/framework/sessions
+#[ -f ${HOME_MCUS}/storage/framework/sessions ] && chmod -R 777 ${HOME_MCUS}/storage/framework/sessions || mkdir ${HOME_MCUS}/storage/framework/sessions && chmod -R 777 ${HOME_MCUS}/storage/framework/sessions
+if [ -f ${HOME_MCUS}/storage/framework/sessions ]; then 
+	chmod -R 777 ${HOME_MCUS}/storage/framework/sessions;
+else
+	mkdir ${HOME_MCUS}/storage/framework/sessions;
+	chmod -R 777 ${HOME_MCUS}/storage/framework/sessions;
+fi
 
 echo "****** Working with config file and content... ******";
 
@@ -80,5 +92,8 @@ chmod -R 777 ${HOME_MCUS}/storage/framework
 
 # End
 
-echo "Copy robot.txt"
-[ -f /var/www/html/robots.txt ] && sudo cp /var/www/html/robots.txt ${HOME_MCUS} || echo "File robots.txt not exist! Skip copy"
+echo "Copy robot.txt if exist"
+#[ -f /var/www/html/robots.txt ] && sudo cp /var/www/html/robots.txt ${HOME_MCUS} || echo "File robots.txt not exist! Skip copy"
+if [ -f /var/www/html/robots.txt ]; then 
+	sudo cp /var/www/html/robots.txt ${HOME_MCUS};
+fi	
